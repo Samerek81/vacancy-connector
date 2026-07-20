@@ -1,0 +1,7 @@
+{
+  "name": "vacancy-connector",
+  "version": "1.0.0",
+  "description": "Contentful ↔ Crowdin vacancy connector — webhook-driven, no database",
+  "type": "module",
+  "engines": { "node": ">=20" }
+}
