@@ -71,9 +71,14 @@ async function processEntry(entryId) {
 
   const fields = entry.fields ?? {};
 
-  // Loop guard — if translations already exist (e.g. de, fr) this publish was
-  // triggered by our own sync-back writing translations to Contentful. Skip it
-  // to prevent an infinite loop.
+  // Only process online vacancies
+  if (fields.isOnline?.['en-US'] !== true) {
+    console.log(`[contentful-webhook] ${entryId} is not online — skipping`);
+    return;
+  }
+
+  // Loop guard — if translations already exist this publish was triggered by
+  // our own sync-back. Skip to prevent an infinite loop.
   const TARGET_LOCALES = ['de', 'fr', 'es', 'it', 'ko', 'zh'];
   const hasTranslations = TARGET_LOCALES.some(locale =>
     typeof fields.position?.[locale] === 'string' && fields.position[locale].trim()
