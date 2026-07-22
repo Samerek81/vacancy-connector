@@ -71,8 +71,9 @@ async function processEntry(entryId) {
 
   const fields = entry.fields ?? {};
 
-  // Only process online vacancies
-  if (fields.isOnline?.['en-US'] !== true) {
+  // Only process online vacancies — support both 'en' and 'en-US' source locales
+  const isOnline = fields.isOnline?.['en-US'] ?? fields.isOnline?.['en'];
+  if (isOnline !== true) {
     console.log(`[contentful-webhook] ${entryId} is not online — skipping`);
     return;
   }
@@ -80,8 +81,10 @@ async function processEntry(entryId) {
   // Loop guard — if translations already exist this publish was triggered by
   // our own sync-back. Skip to prevent an infinite loop.
   const TARGET_LOCALES = ['de', 'fr', 'es', 'it', 'ko', 'zh'];
-  const hasTranslations = TARGET_LOCALES.some(locale =>
-    typeof fields.position?.[locale] === 'string' && fields.position[locale].trim()
+  const srcPosition = fields.position?.['en-US'] ?? fields.position?.['en'];
+  const hasTranslations = srcPosition && TARGET_LOCALES.some(locale =>
+    typeof fields.position?.[locale] === 'string' && fields.position[locale].trim() &&
+    fields.position[locale] !== srcPosition
   );
   if (hasTranslations) {
     console.log(`[contentful-webhook] ${entryId} already has translations — skipping (loop guard)`);

@@ -55,6 +55,11 @@ export const LOCALE_MAP = {
 
 export const TARGET_LANGUAGES = Object.keys(LOCALE_MAP);
 
+/** Get value from a field supporting both 'en' and 'en-US' source locales. */
+function enVal(field) {
+  return field?.['en-US'] ?? field?.['en'];
+}
+
 /**
  * Extract translatable fields from an entry's EN fields.
  * Returns { position, location, department, contractType } (strings only).
@@ -62,7 +67,7 @@ export const TARGET_LANGUAGES = Object.keys(LOCALE_MAP);
 export function extractMainFields(fields) {
   const result = {};
   for (const key of ['position', 'location', 'department', 'contractType']) {
-    const v = fields[key]?.['en-US'];
+    const v = enVal(fields[key]);
     if (typeof v === 'string' && v.trim()) result[key] = v.trim();
   }
   return result;
@@ -139,8 +144,9 @@ export function applyTranslation(entry, locale, mainPayload, descPayload) {
   }
 
   // Rich Text description
-  if (descPayload && fields.description?.['en-US']) {
-    const rebuilt = rebuildRichText(fields.description['en-US'], descPayload);
+  if (descPayload && (fields.description?.['en-US'] || fields.description?.['en'])) {
+    const srcRt = fields.description?.['en-US'] ?? fields.description?.['en'];
+    const rebuilt = rebuildRichText(srcRt, descPayload);
     if (!fields.description[locale]) {
       fields.description[locale] = rebuilt;
       changed = true;

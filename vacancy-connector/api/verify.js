@@ -130,8 +130,12 @@ async function fetchAllOnlineVacancies() {
 
 /** Returns true if all 6 target locales have a translated position field. */
 function isFullyTranslated(fields) {
+  const srcPos = fields.position?.['en-US'] ?? fields.position?.['en'];
+  if (!srcPos) return false;
   return TARGET_LANGUAGES.every(lang => {
     const locale = LOCALE_MAP[lang];
-    return typeof fields.position?.[locale] === 'string' && fields.position[locale].trim();
+    return typeof fields.position?.[locale] === 'string' &&
+           fields.position[locale].trim() &&
+           fields.position[locale] !== srcPos;
   });
 }
