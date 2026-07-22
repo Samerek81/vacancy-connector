@@ -3,6 +3,10 @@
     {
       "path": "/api/sync-back",
       "schedule": "30 * * * *"
+    },
+    {
+      "path": "/api/verify",
+      "schedule": "0 6 * * *"
     }
   ]
 }
