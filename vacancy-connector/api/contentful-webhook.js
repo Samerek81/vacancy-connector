@@ -50,13 +50,13 @@ export default async function handler(req, res) {
 
   console.log(`[contentful-webhook] received publish for ${entryId}`);
 
-  // Respond immediately — Contentful has a short timeout
-  res.status(202).json({ accepted: true, entryId });
-
-  // Process in background
-  processEntry(entryId).catch(err =>
-    console.error(`[contentful-webhook] error processing ${entryId}:`, err.message)
-  );
+  try {
+    await processEntry(entryId);
+    return res.status(200).json({ ok: true, entryId });
+  } catch (err) {
+    console.error(`[contentful-webhook] error processing ${entryId}:`, err.message);
+    return res.status(500).json({ error: err.message });
+  }
 }
 
 async function processEntry(entryId) {
