@@ -72,7 +72,7 @@ export default async function handler(req, res) {
         }
 
         const mainPayload = extractMainFields(fields);
-        const descPayload = extractDescription(fields.description?.['en-US']);
+        const descPayload = extractDescription(fields.description?.['en-US'] ?? fields.description?.['en']);
 
         if (!Object.keys(mainPayload).length) continue;
 
@@ -103,14 +103,15 @@ export default async function handler(req, res) {
   }
 }
 
-/** Fetch all online vacancyDetailPage entries from Contentful (handles pagination). */
+/** Fetch online vacancyDetailPage entries published in the last 6 hours. */
 async function fetchAllOnlineVacancies() {
+  const since = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
   const all = [];
   let skip = 0;
 
   while (true) {
     const url = `https://api.contentful.com/spaces/${SPACE}/environments/${ENV}/entries` +
-      `?content_type=${CONTENT_TYPE}&fields.isOnline=true&limit=${PAGE_SIZE}&skip=${skip}` +
+      `?content_type=${CONTENT_TYPE}&fields.isOnline=true&sys.publishedAt[gte]=${since}&limit=${PAGE_SIZE}&skip=${skip}` +
       `&select=sys,fields.position,fields.location,fields.department,fields.contractType,fields.description,fields.isOnline`;
 
     const res = await fetch(url, {
